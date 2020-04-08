@@ -70,7 +70,7 @@ def get_power_set(nums: set) -> set:
         sets.append(other_set)
     return sets
     
-#abc -> abc, acb, bac, cab, bca, cba
+#abc -> a + bc, a + cb, b + a + c, c + a + b, bc + a, cb + a
 def get_permutations_unique(word) -> list:
     if len(word) <= 1:
         return [word]
@@ -86,6 +86,72 @@ def get_permutations_unique(word) -> list:
 
     return all_perms
 
+def get_permutations_dups(word) -> list:
+    pass
+
+# 1 -> ()
+# 2 -> ()(), (())
+# 3 -> ()()(), (())(), ()(()), ((())), (()())
+def get_valid_parens(num) -> set:
+    if num == 1:
+        return set(['()'])
+
+    sub_parens = get_valid_parens(num - 1)
+    all_parens = set()
+    for sub_paren in sub_parens:
+        all_parens.add('()' + sub_paren)
+        all_parens.add('(' + sub_paren + ')')
+        all_parens.add(sub_paren + '()')
+    return all_parens
+
+def parens_helper(parens, left_rem, right_rem, chars, index):
+    print('PARENS', parens)
+    print('LEFT REM', left_rem)
+    print('RIGHT REM', right_rem)
+    print('CHARS', chars)
+    print('INDEX', index)
+    print()
+    if left_rem < 0 or right_rem < left_rem:
+        return
+    
+    if left_rem == 0 and right_rem == 0:
+        parens.append(''.join(chars))
+    else:
+        chars[index] = '('
+        parens_helper(parens, left_rem - 1, right_rem, chars, index + 1)
+        chars[index] = ')'
+        parens_helper(parens, left_rem, right_rem - 1, chars, index + 1)
+
+def get_valid_parens2(num) -> list:
+    chars = [None] * (num * 2)
+    parens = []
+    parens_helper(parens, num, num, chars, 0)
+    return parens
+
+def paint_fill_helper(screen, x, y, color, orig_color):
+    invalid_coords = x < 0 or y < 0 or y >= len(screen) or x >= len(screen[y])
+    if invalid_coords or screen[y][x] != orig_color:
+        return
+    screen[y][x] = color
+    paint_fill_helper(screen, x - 1, y, color, orig_color)
+    paint_fill_helper(screen, x + 1, y, color, orig_color)
+    paint_fill_helper(screen, x, y + 1, color, orig_color)
+    paint_fill_helper(screen, x, y - 1, color, orig_color)
+
+def paint_fill(screen, x, y, color):
+    paint_fill_helper(screen, x, y, color, screen[y][x])
+
+def get_coins(cents):
+    denominations = [25, 10, 5, 1]
+    if cents <= 1:
+        return 1
+    for denomination in denominations:
+        if cents > denomination:
+            left = cents % denomination
+            counted = cents - left
+            return 1  + get_coins(left)
+    return 0
+    
 
 if __name__ == '__main__':
     # grid = [
@@ -94,4 +160,11 @@ if __name__ == '__main__':
     #     [0, 1, 0, 1, 0],
     #     [0, 0, 0, 0, 0],
     # ]
-    print(get_permutations_unique('abcd'))
+    # screen = [
+    #     ['red', 'red','red','red','red',],
+    #     ['red','red', 'black', 'white', 'white'],
+    #     ['red', 'black', 'white', 'white', 'white'],
+    #     ['black', 'black', 'black', 'black', 'black'],
+    #     ['black', 'black', 'black', 'black', 'black']
+    # ]
+    print(get_coins(27))
