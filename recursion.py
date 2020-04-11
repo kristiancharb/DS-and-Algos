@@ -1,3 +1,4 @@
+import math
 # t(n) = t(n - 3) + t(n - 2) + t(n - 1)
 # t(4) = (1, 3) + (3, 1) + (2, 2) + (1,2,1) + (1, 1, 2) + (1, 1, 1, 1)
 # t(3) = (3) + (2, 1) + (1, 2) + (1, 1, 1)
@@ -141,16 +142,48 @@ def paint_fill_helper(screen, x, y, color, orig_color):
 def paint_fill(screen, x, y, color):
     paint_fill_helper(screen, x, y, color, screen[y][x])
 
-def get_coins(cents):
-    denominations = [25, 10, 5, 1]
-    if cents <= 1:
+#t(100) = t(75) + t(50) + t(25) + 1
+#         1 q      2 q     3 q    4 q
+def change_helper(cents, denominations):
+    if len(denominations) <= 1:
         return 1
-    for denomination in denominations:
-        if cents > denomination:
-            left = cents % denomination
-            counted = cents - left
-            return 1  + get_coins(left)
-    return 0
+    ways = 0
+    while cents > 0:
+        ways += change_helper(cents, denominations[1:])
+        cents -= denominations[0]
+    return ways 
+
+def get_coins(cents):
+    return change_helper(cents, [25, 10, 5, 1])
+
+def is_legal(queens, i, j):
+    for y in range(i):
+        x = queens[y]
+        if x == j:
+            return False
+        if abs(x - j) == (i - y):
+            return False
+    return True
+        
+#    0: 0 1 2 3
+#    1: 0 1 2 3
+#    2: 0 1 2 3 
+#    (2, 3) illegal (0, 1) (1, 2)
+def queens_helper(queens, i):
+    if i == len(queens):
+        print(queens)
+        return
+    
+    for j in range(8):
+        if is_legal(queens, i, j):
+            queens[i] = j
+            queens_helper(queens, i + 1)
+
+
+
+def eight_queens():
+    queens = [None] * 8
+    queens_helper(queens, 0)
     
 
 if __name__ == '__main__':
@@ -167,4 +200,4 @@ if __name__ == '__main__':
     #     ['black', 'black', 'black', 'black', 'black'],
     #     ['black', 'black', 'black', 'black', 'black']
     # ]
-    print(get_coins(27))
+    eight_queens()
